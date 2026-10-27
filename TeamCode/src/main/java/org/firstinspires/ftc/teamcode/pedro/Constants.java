@@ -5,7 +5,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class Constants {
     public static Follower create(HardwareMap h) {
-        // return new Follower(Drivetrain, Localizer, Foresight);
+        return createFollower(h);
+    }
+
+    public static Follower createFollower(HardwareMap h) {
         return null;
     }
 }

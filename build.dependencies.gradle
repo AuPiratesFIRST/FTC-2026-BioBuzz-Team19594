@@ -1,6 +1,10 @@
 repositories {
     mavenCentral()
-    maven { url 'https://repo.dairy.foundation/releases/'}
+    maven { url 'https://repo.dairy.foundation/releases' }
+    maven { url 'https://repo.dairy.foundation/snapshots' }
+    maven { url "https://central.sonatype.com/repository/maven-snapshots/" }
+    maven { url 'https://maven.brott.dev/' }
+
     google() // Needed for androidx
 }
 
@@ -17,4 +21,15 @@ dependencies {
 
     implementation 'com.pedropathing:revhub:3.0.1'
     implementation 'com.pedropathing:tuning:1.0.1'
+    implementation 'com.pedropathing.ivy:pedro:1.1.1'
+
+    implementation 'dev.nextftc.v2:control:0.2.1'
+    implementation 'dev.nextftc.v2:hardware:0.2.1'
+    implementation 'dev.nextftc.v2:robot:0.2.1'
+    implementation 'dev.nextftc.v2:units:0.2.1'
+    implementation 'com.acmerobotics.dashboard:dashboard:0.4.16'
+
+    implementation('com.github.haifengl:smile-interpolation:2.6.0') {
+        exclude group: 'org.slf4j'
+    }
 }
