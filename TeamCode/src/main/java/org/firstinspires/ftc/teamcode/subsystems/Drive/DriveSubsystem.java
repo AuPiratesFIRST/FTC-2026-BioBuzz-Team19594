@@ -187,7 +187,7 @@ public class DriveSubsystem {
         // === ODOMETRY DRIFT CANCELLATION: Correct lateral slip ===
         // Use velocity estimate to counteract unintended lateral movement
         // If we are trying to go forward (strafe=0) but we have lateral velocity, counteract it.
-        if (Math.abs(strafe) < 0.05 && Math.abs(velocityX) > 1.0) {
+        if (Math.abs(strafe) < 0.05 && Math.abs(velocityY) > 1.0) {
             strafe -= velocityY * 0.02; // very small gain
         }
 
@@ -528,8 +528,17 @@ public class DriveSubsystem {
      * 
      * @return Current field heading in radians (0 = facing right, π/2 = up, π = left, 3π/2 = down)
      */
+    private double cachedHeadingRad = 0.0;
+    private long lastImuFetchNanos = 0;
+
     public double getHeading() {
-        return AngleUnit.normalizeRadians(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + imuOffset);
+        long now = System.nanoTime();
+        // 2 ms cache threshold: ensures raw IMU fetch occurs at most once per loop cycle
+        if (now - lastImuFetchNanos > 2_000_000) {
+            lastImuFetchNanos = now;
+            cachedHeadingRad = AngleUnit.normalizeRadians(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS) + imuOffset);
+        }
+        return cachedHeadingRad;
     }
 
     /**

@@ -93,6 +93,13 @@ public class BioBuzzFieldMappingPipeline extends OpenCvPipeline {
     private int rejectedByCircularity = 0;
     private int rejectedByConvexity = 0;
 
+    // Reusable Mat objects and contour list to eliminate GC / native allocation per frame
+    private final Mat hsv = new Mat();
+    private final Mat mask = new Mat();
+    private final Mat hierarchy = new Mat();
+    private final Mat rgb = new Mat();
+    private final List<MatOfPoint> contours = new ArrayList<>();
+
     public BioBuzzFieldMappingPipeline(Telemetry telemetry) {
         this.telemetry = telemetry;
     }
@@ -106,18 +113,17 @@ public class BioBuzzFieldMappingPipeline extends OpenCvPipeline {
         rejectedByCircularity = 0;
         rejectedByConvexity = 0;
 
-        Mat hsv = new Mat();
-        Mat mask = new Mat();
-        List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
+        // Release contours from previous frame
+        for (MatOfPoint contour : contours) {
+            contour.release();
+        }
+        contours.clear();
 
         try {
             // EasyOpenCV commonly delivers RGBA; drop alpha before HSV conversion.
             if (input.channels() == 4) {
-                Mat rgb = new Mat();
                 Imgproc.cvtColor(input, rgb, Imgproc.COLOR_RGBA2RGB);
                 Imgproc.cvtColor(rgb, hsv, Imgproc.COLOR_RGB2HSV);
-                rgb.release();
             } else {
                 Imgproc.cvtColor(input, hsv, Imgproc.COLOR_RGB2HSV);
             }
@@ -298,9 +304,25 @@ public class BioBuzzFieldMappingPipeline extends OpenCvPipeline {
 
             return input;
         } finally {
-            hsv.release(); mask.release(); hierarchy.release();
-            for (MatOfPoint contour : contours) contour.release();
+            for (MatOfPoint contour : contours) {
+                contour.release();
+            }
+            contours.clear();
         }
+    }
+
+    /**
+     * Releases native OpenCV memory on pipeline teardown.
+     */
+    public void release() {
+        if (hsv != null) hsv.release();
+        if (mask != null) mask.release();
+        if (hierarchy != null) hierarchy.release();
+        if (rgb != null) rgb.release();
+        for (MatOfPoint contour : contours) {
+            contour.release();
+        }
+        contours.clear();
     }
 
     private double calculateHullArea(MatOfPoint contour, MatOfInt hullIndices) {

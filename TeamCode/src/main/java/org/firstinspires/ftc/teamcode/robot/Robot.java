@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot;
 
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
@@ -13,40 +14,77 @@ import org.firstinspires.ftc.teamcode.subsystems.turret.Turret;
 import org.firstinspires.ftc.teamcode.subsystems.shooter.FlywheelShooter;
 import org.firstinspires.ftc.teamcode.subsystems.scoring.ScoringSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.sensors.DualSensorIntakeSubsystem;
+import org.jetbrains.annotations.NotNull;
 
-public class Robot {
-    public final HardwareMap hardwareMap;
-    public final Telemetry telemetry;
-    
-    public final Drivetrain drivetrain;
-    public final DriveSubsystem driveSubsystem;
-    public final VisionSubsystem vision;
-    public final Intake intake;
-    public final Blocker blocker;
-    public final Turret turret;
-    public final FlywheelShooter flywheel;
-    public final ScoringSubsystem scoring;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import dev.nextftc.robot.Mechanism;
+import dev.nextftc.robot.NextRobot;
+
+public class Robot implements NextRobot {
+    public HardwareMap hardwareMap;
+    public Telemetry telemetry;
+//
+//    public Drivetrain drivetrain;
+//    public DriveSubsystem driveSubsystem;
+    public VisionSubsystem vision;
+    public Intake intake;
+    public Blocker blocker;
+    public Turret turret;
+    public FlywheelShooter flywheel;
+    public ScoringSubsystem scoring;
+    public DualSensorIntakeSubsystem dualSensorIntake;
+
+    public Robot() {
+        this.turret = new Turret();
+        this.flywheel = new FlywheelShooter();
+    }
 
     public Robot(OpMode opMode) {
+        this();
         this.hardwareMap = opMode.hardwareMap;
         this.telemetry = opMode.telemetry;
 
-        this.drivetrain = new Drivetrain(this);
-        this.driveSubsystem = new DriveSubsystem(hardwareMap, telemetry);
-        this.vision = new VisionSubsystem(this, driveSubsystem);
+        // Enable AUTO LynxModule bulk caching to drastically reduce I2C/CAN bus latency
+        if (hardwareMap != null) {
+            for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
+                module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            }
+        }
+
+//        this.drivetrain = new Drivetrain(this);
+//        this.driveSubsystem = new DriveSubsystem(hardwareMap, telemetry);
+//        this.vision = new VisionSubsystem(this, driveSubsystem);
         this.intake = new Intake(this);
         this.blocker = new Blocker(this);
-        this.turret = new Turret(this);
-        this.flywheel = new FlywheelShooter(this);
         this.scoring = new ScoringSubsystem(this);
 
-        DualSensorIntakeSubsystem dsi = null;
-        try {
-            dsi = new org.firstinspires.ftc.teamcode.subsystems.sensors.DualSensorIntakeSubsystem(
-                    hardwareMap, Alliance.color == Alliance.RED
-            );
-        } catch (Exception ignored) {}
-        this.dualSensorIntake = dsi;
+        if (hardwareMap != null) {
+            try {
+                this.dualSensorIntake = new DualSensorIntakeSubsystem(
+                        hardwareMap, Alliance.color == Alliance.RED
+                );
+            } catch (Exception ignored) {
+                this.dualSensorIntake = null;
+            }
+        } else {
+            this.dualSensorIntake = null;
+        }
     }
-    public final org.firstinspires.ftc.teamcode.subsystems.sensors.DualSensorIntakeSubsystem dualSensorIntake;
+
+    @Override
+    public void periodic() {
+        // NextFTC robot periodic loop
+    }
+
+    @Override
+    @NotNull
+    public Set<Mechanism> getMechanisms() {
+        Set<Mechanism> mechanisms = new HashSet<>();
+        if (turret != null) mechanisms.add(turret);
+        if (flywheel != null) mechanisms.add(flywheel);
+        return Collections.unmodifiableSet(mechanisms);
+    }
 }

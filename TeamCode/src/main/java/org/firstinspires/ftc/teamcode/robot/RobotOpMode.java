@@ -15,8 +15,8 @@ public abstract class RobotOpMode extends OpMode {
 
         // Schedule all subsystem periodic tasks
         schedule(
-                robot.drivetrain.periodic(),
-                robot.vision.periodic()
+//                robot.drivetrain.periodic(),
+//                robot.vision.periodic()
                 // robot.intake.periodic(), 
                 // robot.flywheel.periodic()
         );

@@ -20,21 +20,21 @@ public class Drivetrain {
 
     public final Follower follower;
     private final Telemetry telemetry;
-    private final DcMotorEx frontLeft, frontRight, backLeft, backRight;
+    private final DcMotorEx leftFront, rightFront, leftRear, rightRear;
 
     public Drivetrain(Robot robot) {
         this.telemetry = robot.telemetry;
         this.follower = Constants.createFollower(robot.hardwareMap);
 
-        frontLeft = robot.hardwareMap.get(DcMotorEx.class, "frontLeft");
-        frontRight = robot.hardwareMap.get(DcMotorEx.class, "frontRight");
-        backLeft = robot.hardwareMap.get(DcMotorEx.class, "backLeft");
-        backRight = robot.hardwareMap.get(DcMotorEx.class, "backRight");
+        leftFront = robot.hardwareMap.get(DcMotorEx.class, "leftFront");
+        rightFront = robot.hardwareMap.get(DcMotorEx.class, "rightFront");
+        leftRear = robot.hardwareMap.get(DcMotorEx.class, "leftRear");
+        rightRear = robot.hardwareMap.get(DcMotorEx.class, "rightRear");
 
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     public static void localize(Pose pose) {

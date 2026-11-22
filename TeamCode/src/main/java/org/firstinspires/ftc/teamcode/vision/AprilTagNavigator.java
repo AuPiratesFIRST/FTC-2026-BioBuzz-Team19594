@@ -180,7 +180,9 @@ public class AprilTagNavigator {
             if (error > 12.0) {
                 driveSubsystem.setPosition(new TileCoordinate(finalX, finalY));
                 driveSubsystem.setHeading(finalHeading);
-                telemetry.addData("Vision", "POS SNAP: Correction %.1f in", error);
+                if (telemetry != null) {
+                    telemetry.addData("Vision", "POS SNAP: Correction %.1f in", error);
+                }
             } else {
                 double newX = currentPos.getX() + (finalX - currentPos.getX()) * TRUST_WEIGHT_BASE;
                 double newY = currentPos.getY() + (finalY - currentPos.getY()) * TRUST_WEIGHT_BASE;
@@ -243,8 +245,8 @@ public class AprilTagNavigator {
         if (isHiveTag(detection)) {
             double tiltRad = Math.toRadians(currentHiveState.pitchAngleDegrees);
 
-            // Use the cluster's native Y-coordinate (12.0 or 132.0) as the local pivot axis center
-            double clusterPivotY = tagPedroY;
+            // Use the HIVE center Y-coordinate as the local pivot axis center
+            double clusterPivotY = FieldConstants.HIVE_CENTER_Y;
             double dY = tagPedroY - clusterPivotY;
             double dZ = tagZ - FieldConstants.HIVE_PIVOT_HEIGHT_INCHES;
 
