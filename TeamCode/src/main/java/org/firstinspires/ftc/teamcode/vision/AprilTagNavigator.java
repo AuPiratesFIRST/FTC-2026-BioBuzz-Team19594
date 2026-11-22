@@ -79,12 +79,76 @@ public class AprilTagNavigator {
         return new Pose(pos.getX(), pos.getY(), heading);
     }
 
+    public enum VerticalDirection {
+        STATIONARY,
+        MOVING_UP,
+        MOVING_DOWN
+    }
+
+    private double lastZ = 0;
+    private double lastZTime = 0;
+    private double currentVz = 0; // in/s
+
     public void setHiveState(HiveState state) {
         this.currentHiveState = state;
     }
 
     public HiveState getHiveState() {
         return currentHiveState;
+    }
+
+    /**
+     * Calculates the current physical Z-height (in inches) of the detected target AprilTag.
+     */
+    public double getDetectedZHeight() {
+        AprilTagDetection detection = getBestDetection();
+        if (detection == null || detection.ftcPose == null) {
+            return 0.0;
+        }
+        double elevationRad = Math.toRadians(-detection.ftcPose.pitch);
+        return CAMERA_HEIGHT + (detection.ftcPose.range * Math.sin(elevationRad));
+    }
+
+    /**
+     * Returns true if the target is in the UP state (> 42 inches Z-height).
+     */
+    public boolean isTargetUp() {
+        double z = getDetectedZHeight();
+        return z > 42.05;
+    }
+
+    /**
+     * Returns true if the target is in the DOWN state (<= 42 inches Z-height).
+     */
+    public boolean isTargetDown() {
+        double z = getDetectedZHeight();
+        return z > 0 && z <= 42.05;
+    }
+
+    /**
+     * Calculates the vertical velocity (dz/dt in inches/sec) of the target.
+     */
+    public double getVerticalVelocityInchesPerSecond() {
+        double currentZ = getDetectedZHeight();
+        double now = alignmentTimer.seconds();
+        if (lastZTime > 0 && (now - lastZTime) > 0.01 && currentZ > 0) {
+            double dt = now - lastZTime;
+            double rawVz = (currentZ - lastZ) / dt;
+            currentVz = currentVz * 0.7 + rawVz * 0.3; // Low pass filter
+        }
+        lastZ = currentZ;
+        lastZTime = now;
+        return currentVz;
+    }
+
+    /**
+     * Returns whether the target is STATIONARY, MOVING_UP, or MOVING_DOWN.
+     */
+    public VerticalDirection getVerticalDirection() {
+        double vz = getVerticalVelocityInchesPerSecond();
+        if (vz > 2.0) return VerticalDirection.MOVING_UP;
+        if (vz < -2.0) return VerticalDirection.MOVING_DOWN;
+        return VerticalDirection.STATIONARY;
     }
 
     /**
@@ -97,8 +161,7 @@ public class AprilTagNavigator {
             return currentHiveState;
         }
 
-        double elevationRad = Math.toRadians(-detection.ftcPose.pitch);
-        double detectedZ = CAMERA_HEIGHT + (detection.ftcPose.range * Math.sin(elevationRad));
+        double detectedZ = getDetectedZHeight();
 
         if (detectedZ > 42.05) {
             currentHiveState = HiveState.RED_TILTED_UP;
