@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems.turret;
 
-import static com.pedropathing.ivy.commands.Commands.instant;
-
 import com.pedropathing.ivy.Command;
 import com.qualcomm.robotcore.util.Range;
 
@@ -12,7 +10,7 @@ import org.firstinspires.ftc.teamcode.util.VelocityCompensationCalculator;
 import dev.nextftc.hardware.actuators.NextServo;
 import dev.nextftc.robot.Mechanism;
 
-public class Turret implements Mechanism {
+public class ServoTurret implements Mechanism {
     public enum Mode {
         DISABLED,
         AUTO_AIM,
@@ -29,16 +27,18 @@ public class Turret implements Mechanism {
     public static double MIN_TURRET_ANGLE = Math.toRadians(-157);
     public static double MAX_TURRET_ANGLE = Math.toRadians(157);
 
-    double[] angleValues = new double[]{Math.toRadians(-90), Math.toRadians(90)};
-    double[] servoPositions = new double[]{0.78, 0.22}; // TODO: tune
+    double[] angleValues = new double[] { Math.toRadians(-90), Math.toRadians(90) };
+    double[] servoPositions = new double[] { 0.78, 0.22 }; // TODO: tune
 
-    public double MIN_SERVO_POS = Math.min(getServoPosFromAngle(MIN_TURRET_ANGLE), getServoPosFromAngle(MAX_TURRET_ANGLE));
-    public double MAX_SERVO_POS = Math.max(getServoPosFromAngle(MIN_TURRET_ANGLE), getServoPosFromAngle(MAX_TURRET_ANGLE));
+    public double MIN_SERVO_POS = Math.min(getServoPosFromAngle(MIN_TURRET_ANGLE),
+            getServoPosFromAngle(MAX_TURRET_ANGLE));
+    public double MAX_SERVO_POS = Math.max(getServoPosFromAngle(MIN_TURRET_ANGLE),
+            getServoPosFromAngle(MAX_TURRET_ANGLE));
 
-    public Turret() {
+    public ServoTurret() {
     }
 
-    public Turret(Robot robot) {
+    public ServoTurret(Robot robot) {
         this();
     }
 
@@ -71,7 +71,8 @@ public class Turret implements Mechanism {
     }
 
     /**
-     * @return The target angle of the turret in radians. Note that counter-clockwise is positive with 0 being straight forward.
+     * @return The target angle of the turret in radians. Note that
+     *         counter-clockwise is positive with 0 being straight forward.
      */
     public double getTargetAngle() {
         double currentPos = getTargetPosition();

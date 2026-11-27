@@ -62,6 +62,11 @@ public class Drivetrain {
         return infinite(() -> {
             follower.update();
             poseTransfer = follower.pose();
+
+            // Update goal target selection and shoot-on-the-move velocity lead compensation
+            org.firstinspires.ftc.teamcode.Constants.HivePoses.update(follower);
+            org.firstinspires.ftc.teamcode.util.VelocityCompensationCalculator.update(follower);
+
             telemetry.addData("X", follower.pose().x());
             telemetry.addData("Y", follower.pose().y());
             telemetry.addData("Heading", Math.toDegrees(follower.pose().heading()));

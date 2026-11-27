@@ -66,8 +66,10 @@ public class VisionSubsystem {
         bioBuzzPipeline = new BioBuzzFieldMappingPipeline(robot.telemetry);
         bioBuzzAdapter = new OpenCvPipelineAdapter(bioBuzzPipeline);
 
+        WebcamName webcam = getWebcam(hwMap);
+
         visionPortal = new VisionPortal.Builder()
-                .setCamera(hwMap.get(WebcamName.class, "Webcam 1"))
+                .setCamera(webcam)
                 .setCameraResolution(new Size(320, 240)) // matches calibrated intrinsics above
                 .addProcessors(aprilTag, bioBuzzAdapter)
                 .build();
@@ -105,5 +107,21 @@ public class VisionSubsystem {
         return infinite(() -> {
             // Background vision tasks if needed
         });
+    }
+
+    private static WebcamName getWebcam(HardwareMap hwMap) {
+        if (hwMap == null) return null;
+        try {
+            WebcamName webcam = hwMap.get(WebcamName.class, "Webcam 1");
+            if (webcam != null) return webcam;
+        } catch (Exception ignored) {}
+        try {
+            WebcamName webcam = hwMap.get(WebcamName.class, "webcam");
+            if (webcam != null) return webcam;
+        } catch (Exception ignored) {}
+        try {
+            return hwMap.getAll(WebcamName.class).iterator().next();
+        } catch (Exception ignored) {}
+        return null;
     }
 }

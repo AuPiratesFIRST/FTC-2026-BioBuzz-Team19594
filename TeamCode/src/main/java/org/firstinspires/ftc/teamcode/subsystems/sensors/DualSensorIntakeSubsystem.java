@@ -71,10 +71,10 @@ public class DualSensorIntakeSubsystem {
     public DualSensorIntakeSubsystem(HardwareMap hardwareMap, boolean isRedAlliance) {
         this.isRedAlliance = isRedAlliance;
 
-        // Hardware mapping
-        entrySensor = hardwareMap.get(ColorRangeSensor.class, "entry_sensor");
-        topSensor = hardwareMap.get(ColorRangeSensor.class, "top_sensor");
-        hoodServo = hardwareMap.get(ServoImplEx.class, "hood_servo");
+        // Hardware mapping (supports both camelCase and snake_case XML config names)
+        this.entrySensor = getSensor(hardwareMap, "entrySensor", "entry_sensor");
+        this.topSensor = getSensor(hardwareMap, "topSensor", "top_sensor");
+        this.hoodServo = getServo(hardwareMap, "hoodServo", "hood_servo");
 
         // Enable built-in light for both sensors
         if (entrySensor instanceof SwitchableLight) {
@@ -257,6 +257,22 @@ public class DualSensorIntakeSubsystem {
         } else {
             setHoodPosition(HOOD_LARGE_BALL_POS);
         }
+    }
+
+    private static ColorRangeSensor getSensor(HardwareMap hwMap, String primary, String fallback) {
+        try {
+            ColorRangeSensor sensor = hwMap.get(ColorRangeSensor.class, primary);
+            if (sensor != null) return sensor;
+        } catch (Exception ignored) {}
+        return hwMap.get(ColorRangeSensor.class, fallback);
+    }
+
+    private static ServoImplEx getServo(HardwareMap hwMap, String primary, String fallback) {
+        try {
+            ServoImplEx servo = hwMap.get(ServoImplEx.class, primary);
+            if (servo != null) return servo;
+        } catch (Exception ignored) {}
+        return hwMap.get(ServoImplEx.class, fallback);
     }
 
     private void setHoodPosition(double pos) {

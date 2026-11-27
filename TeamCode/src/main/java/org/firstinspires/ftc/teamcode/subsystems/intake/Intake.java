@@ -102,6 +102,10 @@ public class Intake implements Mechanism {
         return conditional(() -> upper.isOff() && lower.isOff(), on(), off());
     }
 
+    public Command command() {
+        return com.pedropathing.ivy.commands.Commands.infinite(this::periodic);
+    }
+
     @Override
     public void periodic() {
         // Subsystem periodic loop execution
